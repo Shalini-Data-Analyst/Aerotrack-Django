@@ -1,0 +1,154 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AeroTrack | Satellite Explorer</title>
+    <link rel="stylesheet" href="{% static 'telemetry/style.css' %}">
+    <style>
+        .module-header {
+            background: linear-gradient(110deg,#30205f,#6250c8,#238eae);
+            color: white;
+            padding: 30px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+        }
+        .satellite-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+            gap: 20px;
+        }
+        .sat-card {
+            background: white;
+            border: 1px solid #e8e2f5;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: .3s;
+        }
+        .sat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px #49318c20;
+        }
+        .sat-image {
+            height: 155px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle,#53449c,#181436);
+            font-size: 75px;
+        }
+        .sat-content { padding: 20px; }
+        .sat-content h3 { color: #493581; margin-bottom: 12px; }
+        .sat-content p { font-size: 12px; color: #817b97; margin: 10px 0; }
+        .details-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #7152d6;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+        .module-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+        .module-filter input, .module-filter select {
+            padding: 12px;
+            border: 1px solid #e5def4;
+            border-radius: 8px;
+        }
+        .module-filter button {
+            background: #7152d6;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="dashboard-page">
+
+<div class="main-content" style="margin-left:0">
+
+    <a href="{% url 'dashboard' %}" class="details-btn">← Dashboard</a>
+
+    <div class="module-header">
+        <h1>🛰️ Satellite Records Explorer</h1>
+        <p>Explore and manage your registered spacecraft.</p>
+        <h2 style="margin-top:15px">{{ total_records }} Satellites Registered</h2>
+    </div>
+
+    <form method="GET" class="module-filter">
+        <input name="q" value="{{ search }}" placeholder="🔍 Search satellite ID">
+
+        <select name="status">
+            <option value="all">All Status</option>
+            <option value="Active" {% if selected_status == "Active" %}selected{% endif %}>Active</option>
+            <option value="Warning" {% if selected_status == "Warning" %}selected{% endif %}>Warning</option>
+            <option value="Critical" {% if selected_status == "Critical" %}selected{% endif %}>Critical</option>
+        </select>
+
+        <button type="submit">Search 🔍</button>
+    </form>
+
+    <div class="satellite-grid">
+
+        {% for satellite in page_obj %}
+        <div class="sat-card">
+
+            <div class="sat-image">
+                🛰️
+            </div>
+
+            <div class="sat-content">
+
+                <h3>{{ satellite.satellite_id }}</h3>
+
+                <p>🌍 Altitude: {{ satellite.altitude }} km</p>
+                <p>🌡️ Temperature: {{ satellite.temperature }} °C</p>
+                <p>🔋 Battery: {{ satellite.battery }}%</p>
+                <p>📶 Signal: {{ satellite.signal_strength }}</p>
+
+                <p>
+                    🚦 Status:
+                    <strong>{{ satellite.status }}</strong>
+                </p>
+
+                <a href="{% url 'satellite_detail' satellite.pk %}"
+                   class="details-btn">
+                    Explore Satellite →
+                </a>
+
+            </div>
+        </div>
+        {% empty %}
+        <p>No satellite records found. 🌌</p>
+        {% endfor %}
+
+    </div>
+
+    <div class="pagination-area">
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        <div class="pagination-buttons">
+
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ search|urlencode }}&status={{ selected_status }}">← Previous</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ search|urlencode }}&status={{ selected_status }}">Next →</a>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

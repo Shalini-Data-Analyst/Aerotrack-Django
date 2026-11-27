@@ -1,0 +1,220 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AeroTrack | Orbit Monitoring</title>
+    <link rel="stylesheet" href="{% static 'telemetry/style.css' %}">
+
+    <style>
+        .orbit-panel {
+            background: radial-gradient(circle at center,#29366e,#11152e 65%,#080b1c);
+            border-radius: 20px;
+            min-height: 560px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .orbit-stage {
+            height: 450px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .planet {
+            width: 155px;
+            height: 155px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%,#7de9ff,#2868bd 55%,#102456);
+            box-shadow: 0 0 45px #34b9ff88, inset -18px -12px 25px #071a49;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 65px;
+            z-index: 2;
+            animation: earthGlow 4s ease-in-out infinite;
+        }
+        .orbit-ring {
+            position: absolute;
+            border: 1px dashed #72dfff77;
+            border-radius: 50%;
+            width: 260px;
+            height: 260px;
+            animation: rotateOrbit 15s linear infinite;
+        }
+        .orbit-ring.r2 {
+            width: 360px;
+            height: 360px;
+            animation-duration: 22s;
+        }
+        .orbit-ring.r3 {
+            width: 455px;
+            height: 455px;
+            animation-duration: 30s;
+        }
+        .orbit-satellite {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 27px;
+            transform: translate(-50%,-50%);
+            z-index: 4;
+            animation: orbitMove 8s linear infinite;
+            transform-origin: center;
+        }
+        .orbit-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 18px;
+            color: #d7eaff;
+            font-size: 11px;
+        }
+        .orbit-info {
+            margin-top: 20px;
+            background: #ffffff0c;
+            border: 1px solid #ffffff22;
+            padding: 18px;
+            border-radius: 12px;
+            color: #e4eaff;
+        }
+        .orbit-info p {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        @keyframes rotateOrbit {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes earthGlow {
+            50% { box-shadow: 0 0 65px #34b9ffcc, inset -18px -12px 25px #071a49; }
+        }
+        @keyframes orbitMove {
+            from { transform: translate(-50%,-50%) rotate(0deg) translateX(130px) rotate(0deg); }
+            to { transform: translate(-50%,-50%) rotate(360deg) translateX(130px) rotate(-360deg); }
+        }
+        @media(max-width:600px) {
+            .orbit-stage { transform: scale(.72); transform-origin:center; }
+        }
+    </style>
+</head>
+
+<body class="dashboard-page">
+
+<main class="main-content" style="margin-left:0">
+
+    <a href="{% url 'dashboard' %}" class="export-button">← Dashboard</a>
+
+    <div class="hero-banner" style="margin-top:20px">
+        <div>
+            <span>🌍 ORBITAL VISUALIZATION CENTER</span>
+            <h2>Explore Satellite Orbits</h2>
+            <p>Visual representation of your registered satellite network.</p>
+        </div>
+        <div class="hero-emoji">🌎</div>
+    </div>
+
+    <div class="orbit-panel" style="margin-top:25px">
+
+        <h2>🌌 Earth & Satellite Visualization</h2>
+        <p style="color:#aab9e8;font-size:11px;margin-top:8px">
+            Animated illustrative orbit simulation
+        </p>
+
+        <div class="orbit-stage">
+
+            <div class="orbit-ring"></div>
+            <div class="orbit-ring r2"></div>
+            <div class="orbit-ring r3"></div>
+
+            <div class="planet">🌍</div>
+
+            <div id="satelliteLayer"></div>
+
+        </div>
+
+        <div class="orbit-legend">
+            <span>🔵 Earth</span>
+            <span>🛰️ Satellite markers</span>
+            <span>⭕ Illustrative orbital paths</span>
+        </div>
+
+        <div class="orbit-info">
+            <h3>📡 Network Overview</h3>
+            <p>Total registered satellites: {{ total_satellites }}</p>
+            <p>Positions shown are illustrative, not live tracking coordinates.</p>
+        </div>
+
+    </div>
+
+    <section class="records-panel" style="margin-top:25px">
+        <h2>🛰️ Registered Satellite Network</h2>
+
+        <table style="margin-top:20px">
+            <thead>
+                <tr>
+                    <th>Satellite ID</th>
+                    <th>Altitude</th>
+                    <th>Battery</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for satellite in satellites %}
+                <tr>
+                    <td>{{ satellite.satellite_id }}</td>
+                    <td>{{ satellite.altitude }} km</td>
+                    <td>{{ satellite.battery }}%</td>
+                    <td>{{ satellite.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No satellites registered.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+{{ orbit_data|json_script:"orbit-data" }}
+
+<script>
+const satellites = JSON.parse(
+    document.getElementById("orbit-data").textContent
+);
+
+const layer = document.getElementById("satelliteLayer");
+
+satellites.forEach((satellite, index) => {
+
+    const marker = document.createElement("div");
+
+    marker.className = "orbit-satellite";
+    marker.textContent = "🛰️";
+
+    const radius = 130 + (index % 4) * 35;
+    const duration = 8 + (index % 5) * 3;
+
+    marker.style.animationDuration = duration + "s";
+    marker.style.setProperty(
+        "--unused-radius",
+        radius + "px"
+    );
+
+    marker.style.animationName = "orbitMove";
+    marker.style.filter =
+        satellite.status === "Critical"
+            ? "drop-shadow(0 0 8px red)"
+            : "drop-shadow(0 0 8px cyan)";
+
+    layer.appendChild(marker);
+});
+</script>
+
+</body>
+</html>

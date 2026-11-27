@@ -1,0 +1,201 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AeroTrack | Telemetry Center</title>
+    <link rel="stylesheet" href="{% static 'telemetry/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+            gap: 20px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 22px;
+            min-width: 0;
+            border: 1px solid #e8e2f5;
+        }
+        .chart-card h3 {
+            color: #493581;
+            margin-bottom: 20px;
+        }
+        .chart-area {
+            height: 260px;
+        }
+        .telemetry-table {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body class="dashboard-page">
+
+<main class="main-content" style="margin-left:0">
+
+    <a href="{% url 'dashboard' %}" class="export-button">← Dashboard</a>
+
+    <div class="hero-banner" style="margin-top:20px">
+        <div>
+            <span>📡 MISSION DATA CENTER</span>
+            <h2>Telemetry Intelligence</h2>
+            <p>Analyze satellite performance and communication parameters.</p>
+        </div>
+        <div class="hero-emoji">📡</div>
+    </div>
+
+    <section class="telemetry-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">🔋</div>
+            <p>Average Battery</p>
+            <h2>{{ average_battery }}%</h2>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🌡️</div>
+            <p>Average Temperature</p>
+            <h2>{{ average_temperature }}°C</h2>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🌍</div>
+            <p>Average Altitude</p>
+            <h2>{{ average_altitude }} km</h2>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🛰️</div>
+            <p>Total Satellites</p>
+            <h2>{{ total }}</h2>
+        </div>
+
+    </section>
+
+    <div class="chart-grid">
+
+        <div class="chart-card">
+            <h3>🔋 Battery Analysis</h3>
+            <div class="chart-area">
+                <canvas id="batteryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>🌡️ Temperature Analysis</h3>
+            <div class="chart-area">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>📶 Signal Strength</h3>
+            <div class="chart-area">
+                <canvas id="signalChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="telemetry-table">
+        <h2>📡 Satellite Measurements</h2>
+
+        <table style="margin-top:20px">
+            <thead>
+                <tr>
+                    <th>Satellite</th>
+                    <th>Battery</th>
+                    <th>Temperature</th>
+                    <th>Signal</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.satellite_id }}</td>
+                    <td>{{ record.battery }}%</td>
+                    <td>{{ record.temperature }} °C</td>
+                    <td>{{ record.signal_strength }}</td>
+                    <td>{{ record.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No telemetry data available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+{{ chart_data|json_script:"chart-data" }}
+
+<script>
+const data = JSON.parse(
+    document.getElementById("chart-data").textContent
+);
+
+function createChart(element, label, values, color) {
+
+    new Chart(document.getElementById(element), {
+        type: "bar",
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: label,
+                data: values,
+                backgroundColor: color,
+                borderRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+createChart(
+    "batteryChart",
+    "Battery %",
+    data.battery,
+    "#7958e8"
+);
+
+createChart(
+    "temperatureChart",
+    "Temperature °C",
+    data.temperature,
+    "#24a9cb"
+);
+
+createChart(
+    "signalChart",
+    "Signal Strength",
+    data.signal,
+    "#30b58a"
+);
+</script>
+
+</body>
+</html>

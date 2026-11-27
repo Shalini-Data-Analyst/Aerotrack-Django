@@ -1,0 +1,114 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroTrack | Mission Login</title>
+    <link rel="stylesheet" href="{% static 'telemetry/style.css' %}">
+</head>
+
+<body class="login-page">
+
+<div class="login-container">
+
+    <div class="login-left">
+
+        <div class="login-brand">🚀 AEROTRACK</div>
+
+        <div class="space-visual">
+            <div class="earth">🌍</div>
+            <div class="satellite">🛰️</div>
+            <div class="rocket">🚀</div>
+            <div class="stars">✦　 ✧　 ✦　 ✧</div>
+        </div>
+
+        <h1>Explore Beyond<br>
+            <span>Our Atmosphere.</span>
+        </h1>
+
+        <p>
+            Welcome to your satellite telemetry
+            monitoring command center.
+        </p>
+
+        <div class="space-footer">
+            🌌 EXPLORE · MONITOR · DISCOVER
+        </div>
+
+    </div>
+
+    <div class="login-right">
+
+        <div class="login-card">
+
+            <div class="login-icon">🛰️</div>
+
+            <span class="login-label">MISSION CONTROL ACCESS</span>
+
+            <h2>Welcome Back!</h2>
+
+            <p class="login-description">
+                Sign in to access your AeroTrack dashboard.
+            </p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-message">
+                        ⚠️ {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <label>Username</label>
+
+                <div class="input-box">
+                    <span>👩‍🚀</span>
+                    <input
+                        type="text"
+                        name="username"
+                        placeholder="Enter username"
+                        autocomplete="username"
+                        required>
+                </div>
+
+                <label>Password</label>
+
+                <div class="input-box">
+                    <span>🔐</span>
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Enter password"
+                        autocomplete="current-password"
+                        required>
+                </div>
+
+                <button type="submit" class="login-button">
+                    Launch Dashboard 🚀
+                </button>
+
+            </form>
+
+            <div class="auth-switch">New to AeroTrack? <a href="{% url 'signup' %}">Create Account</a></div>
+
+            <div class="secure-note">
+                🔒 Protected by Django Authentication
+            </div>
+
+        </div>
+
+        <div class="copyright">
+            © 2026 AEROTRACK | SPACE DATA SYSTEM
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
