@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: aerotrack
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn aerotrack.wsgi:application"
