@@ -3,8 +3,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-aerotrack-lab-demo-key-change-for-production"
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
